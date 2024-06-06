@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jerry's Library</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f'); /* Library background */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 3em;
+            margin-bottom: 20px;
+            font-family: 'Georgia', serif;
+        }
+        input[type="text"], input[type="button"], select {
+            padding: 10px;
+            margin: 5px;
+            width: calc(100% - 30px);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            cursor: pointer;
+        }
+        .button {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Jerry's Library</h1>
+        <input type="text" id="title" placeholder="Book Title">
+        <input type="text" id="author" placeholder="Book Author">
+        <input type="text" id="genre" placeholder="Genre">
+        <input type="button" value="Add Book" onclick="addBook()">
+        <input type="text" id="filterAuthor" placeholder="Filter by Author" oninput="filterBooks()">
+        <input type="text" id="filterGenre" placeholder="Filter by Genre" oninput="filterBooks()">
+        <table>
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">Title</th>
+                    <th onclick="sortTable(1)">Author</th>
+                    <th onclick="sortTable(2)">Genre</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="book-list"></tbody>
+        </table>
+    </div>
+
+    <script>
+        let books = [];
+
+        function addBook() {
+            const title = document.getElementById('title').value;
+            const author = document.getElementById('author').value;
+            const genre = document.getElementById('genre').value;
+
+            if (title && author && genre) {
+                const book = { title, author, genre };
+                books.push(book);
+                displayBooks();
+                clearInputs();
+            }
+        }
+
+        function displayBooks(filteredBooks = books) {
+            const bookList = document.getElementById('book-list');
+            bookList.innerHTML = '';
+            filteredBooks.forEach((book, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td><input type="text" value="${book.title}" onchange="editBook(${index}, 'title', this.value)"></td>
+                                 <td><input type="text" value="${book.author}" onchange="editBook(${index}, 'author', this.value)"></td>
+                                 <td><input type="text" value="${book.genre}" onchange="editBook(${index}, 'genre', this.value)"></td>
+                                 <td><button class="button" onclick="deleteBook(${index})">Delete</button></td>`;
+                bookList.appendChild(row);
+            });
+        }
+
+        function clearInputs() {
+            document.getElementById('title').value = '';
+            document.getElementById('author').value = '';
+            document.getElementById('genre').value = '';
+        }
+
+        function deleteBook(index) {
+            books.splice(index, 1);
+            displayBooks();
+        }
+
+        function editBook(index, field, value) {
+            books[index][field] = value;
+            displayBooks();
+        }
+
+        function sortTable(n) {
+            let table = document.querySelector("table");
+            let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            switching = true;
+            dir = "asc"; 
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+                    if (dir == "asc") {
+                        if (x.children[0].value.toLowerCase() > y.children[0].value.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.children[0].value.toLowerCase() < y.children[0].value.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount ++;
+                } else {
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+        function filterBooks() {
+            const filterAuthor = document.getElementById('filterAuthor').value.toLowerCase();
+            const filterGenre = document.getElementById('filterGenre').value.toLowerCase();
+            const filteredBooks = books.filter(book => 
+                (book.author.toLowerCase().includes(filterAuthor)) && 
+                (book.genre.toLowerCase().includes(filterGenre))
+            );
+            displayBooks(filteredBooks);
+        }
+    </script>
+</body>
+</html>
